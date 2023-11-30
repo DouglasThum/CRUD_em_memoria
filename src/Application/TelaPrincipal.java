@@ -9,11 +9,13 @@ import dao.IClienteDAO;
 import domain.Cliente;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import service.ClienteService;
 
 public class TelaPrincipal extends javax.swing.JFrame {
     
     private DefaultTableModel modelo = new DefaultTableModel();
     private IClienteDAO clienteDAO = new ClienteMapDAO();
+    private ClienteService service = new ClienteService();
 
     /**
      * Creates new form TelaPrincipal
@@ -238,8 +240,13 @@ public class TelaPrincipal extends javax.swing.JFrame {
         String cidade = txtCidade.getText();
         String estado = txtEstado.getText();
         
-        if (!isCamposValidos(nome, cpf, telefone, rua, numero, cidade, estado)) {
+        if (!service.isCamposValidos(nome, cpf, telefone, rua, numero, cidade, estado)) {
             JOptionPane.showMessageDialog(null, "Existem campos a serem preenchidos!", "Atenção", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        if (!service.isNumero(cpf, telefone, numero)) {
+            JOptionPane.showMessageDialog(null, "Campos não foram preenchidos corretamente", "Atenção", JOptionPane.ERROR_MESSAGE);
             return;
         }
         
@@ -299,6 +306,11 @@ public class TelaPrincipal extends javax.swing.JFrame {
         Long cpf = (Long) tabelaClientes.getValueAt(linhaSelecionada, 1);
         Cliente cliente = clienteDAO.consultar(cpf);
         
+        if (!service.isNumero(txtCPF.getText())) {
+            JOptionPane.showMessageDialog(null, "Campos numéricos não foram preenchidos corretamente", "Atenção", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
         Long isCpfIgual = Long.parseLong(txtCPF.getText());
         
         if (cliente.getCpf() != isCpfIgual) {
@@ -311,8 +323,13 @@ public class TelaPrincipal extends javax.swing.JFrame {
             String cidade = txtCidade.getText();
             String estado = txtEstado.getText();
             
-            if (!isCamposValidos(nome, telefone, rua, numero, cidade, estado)) {
+            if (!service.isCamposValidos(nome, telefone, rua, numero, cidade, estado)) {
                 JOptionPane.showMessageDialog(null, "Existem campos a serem preenchidos!", "Atenção", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+            if (!service.isNumero(telefone, numero, cliente.getCpf().toString())) {
+                JOptionPane.showMessageDialog(null, "Campos numéricos não foram preenchidos corretamente", "Atenção", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             
@@ -387,15 +404,6 @@ public class TelaPrincipal extends javax.swing.JFrame {
     private javax.swing.JTextField txtRua;
     private javax.swing.JTextField txtTelefone;
     // End of variables declaration//GEN-END:variables
-
-    private boolean isCamposValidos(String ...campos) {
-        for (String campo : campos) {
-            if (campos == null || "".equals(campo)){
-                return false;
-            }
-        }
-        return true;
-    }
 
     private void initCustomComponents() {
         modelo.addColumn("Nome");
